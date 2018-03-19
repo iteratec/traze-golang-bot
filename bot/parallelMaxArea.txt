@@ -1,0 +1,29 @@
+func (bot *Bot) maxArea() {
+    n := len(bot.freeNeighborsMap)
+    wg := sync.WaitGroup{}
+    ch := make(chan model.CardinalScore, n)
+
+    for dir, loc := range bot.freeNeighborsMap {
+        wg.Add(1)
+        go func(dir model.Cardinal, loc model.Location, ch chan model.CardinalScore, wg *sync.WaitGroup) {
+            ch <- model.CardinalScore{Cardinal:dir, Score:bot.computeScore(loc)}
+            wg.Done()
+        }(dir, loc, ch, &wg)
+    }
+    wg.Wait() // Wait for all results
+    close(ch)
+
+    max := math.MinInt32
+    nextMove := bot.direction
+
+    for cardinalResult := range ch {
+        if cardinalResult.Score > max {
+            max = cardinalResult.Score
+            nextMove = cardinalResult.Cardinal
+        }
+        logging.Log.Debugf("Moving %v has score %v", cardinalResult.Cardinal, cardinalResult.Score)
+    }
+
+    logging.Log.Debugf("Pos: %v Dir: %v Possible moves: %v Going %v (%v)", bot.pos, bot.direction, bot.freeNeighborsMap, nextMove, max)
+    bot.steer(nextMove)
+}
