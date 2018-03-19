@@ -115,7 +115,6 @@ func NewMessageQueue() *MessageQueue {
     //    user = conf.Username + ":" + conf.Password
     //}
     logging.Log.Notice("Connecting to MQTT Broker at " + conf.BrokerAddress + " as " + user)
-    logging.Log.Notice("User: " + user)
 
     // register event handlers
     opts.SetConnectionLostHandler(mq.connectionLostHandler)
