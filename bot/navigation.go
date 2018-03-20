@@ -2,6 +2,18 @@ package bot
 
 import "../model"
 
+func manhattenDistance(pt1 model.Location, pt2 model.Location) int {
+    distX := pt1[0] - pt2[0]
+    if distX < 0 {
+        distX = -distX
+    }
+    distY := pt1[1] - pt2[1]
+    if distY < 0 {
+        distY = -distY
+    }
+    return distX + distY
+}
+
 func turnRight(dir model.Cardinal) model.Cardinal {
     if dir == model.W {
         return model.N
