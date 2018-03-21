@@ -9,14 +9,11 @@ import (
     "strconv"
     "time"
     "os"
+    "math"
 )
 
 const BROKER_GRACE_TIME = 500
 const NOT_ON_GRID_TRESHOLD = 1
-const WEIGHT_MY_TILES = 10000000
-const WEIGHT_ENEMY_TILES = -100000
-const WEIGHT_MY_ROUNDS  = 0
-const DANGER_SCORE = 0
 
 type Bot struct {
     mq               *mqtt.MessageQueue
@@ -30,6 +27,8 @@ type Bot struct {
     grid             model.Grid
     countNotOnGrid   int
     freeNeighborsMap map[model.Cardinal]model.Location
+    victim           model.Bike
+    hasVictim        bool
 }
 
 func NewBot() *Bot {
@@ -37,7 +36,7 @@ func NewBot() *Bot {
     conf := config.GetConfig()
     mq := mqtt.NewMessageQueue()
 
-    bot := &Bot{mq:mq, ready:false, spawned:false}
+    bot := &Bot{mq:mq, ready:false, spawned:false, hasVictim:false}
 
     // Subscribe to grid topic
     mq.Subscribe("traze/"+conf.GameInstance+"/grid", func(msg []byte) {
@@ -79,12 +78,28 @@ func NewBot() *Bot {
 
 func (bot *Bot) step() {
     if len(bot.grid.Bikes) == 1 {
+        bot.hasVictim = false
         bot.wallHug()
     } else {
-        if bot.aloneInComponent() {
-            bot.wallHug()
-        } else {
-            bot.maxArea()
+        componentEnemies := bot.enemiesInComponent()
+        if len(componentEnemies) == 0 {
+            bot.hasVictim = false
+            bot.wallHug() // alone in component
+        } else { // enemy in component
+            if bot.hasVictim {
+                logging.Log.Debugf("Attacking victim %v", bot.victim.PlayerId)
+                bot.maxArea()
+            } else {
+                minDist := math.MaxInt32
+                for  _, bike :=  range componentEnemies {
+                    if bike.Distance < minDist {
+                        bot.victim = bike
+                    }
+                }
+                logging.Log.Debugf("Attacking closest enemy. Dist %v Pos %v Id %v", bot.victim.Distance, bot.victim.CurrentLocation, bot.victim.PlayerId)
+                bot.hasVictim = true
+                bot.maxArea()
+            }
         }
     }
 }
@@ -130,6 +145,47 @@ func (bot *Bot) handleGridUpdate(grid model.Grid){
 
         bot.step()
     }
+}
+
+// map[enemyId]distance
+func (bot *Bot) enemiesInComponent() []model.Bike {
+
+    // Make copy of grid
+    var cols []model.Col
+    for _, srcCol := range bot.grid.Tiles {
+        col := make([]int, len(srcCol))
+        copy(col, srcCol)
+        cols = append(cols, col)
+    }
+    grid := model.Grid{Height:bot.grid.Height, Width:bot.grid.Width, Tiles: cols}
+
+    gains := []model.Location{bot.pos}
+    var enemies []model.Bike
+    for { // rounds; break if no gains anymore
+        lastGains := make([]model.Location, len(gains))
+        copy(lastGains,gains)
+        gains = nil
+        for _, lastGain := range lastGains {
+            for _, gain := range freeNeighbors(lastGain, grid) {
+                for _,bike := range bot.grid.Bikes {
+                    if bike.PlayerId != bot.playerId {
+                        for _, enemyNeighbor := range freeNeighbors(bike.CurrentLocation,bot.grid) {
+                            if enemyNeighbor == gain {
+                                bike.Distance = manhattanDistance(bot.pos, bike.CurrentLocation)
+                                enemies = append(enemies,bike)
+                            }
+                        }
+                    }
+                }
+                gains = append(gains, gain)
+                grid.Tiles[gain[0]][gain[1]] = bot.playerId
+            }
+        }
+        if len(gains) == 0{
+            break // no gain
+        }
+    }
+    return enemies
 }
 
 func (bot *Bot) aloneInComponent() bool {

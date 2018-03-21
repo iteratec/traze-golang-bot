@@ -8,6 +8,7 @@ type Bike struct {
     Trail []Location `json:"trail"`
     Direction string `json:"direction"`
     PlayerId int `json:"playerId"`
+    Distance int
 }
 
 type Grid struct {
