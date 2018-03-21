@@ -86,7 +86,7 @@ func (bot *Bot) step() {
             bot.hasVictim = false
             bot.wallHug() // alone in component
         } else { // enemy in component
-            if bot.hasVictim {
+            if bot.hasVictim && bot.isAlive(bot.victim.PlayerId) {
                 logging.Log.Debugf("Attacking victim %v", bot.victim.PlayerId)
                 bot.maxArea()
             } else {
@@ -102,6 +102,16 @@ func (bot *Bot) step() {
             }
         }
     }
+}
+
+func (bot *Bot) isAlive(playerId int) bool {
+    for _, bike := range bot.grid.Bikes {
+        if bike.PlayerId == playerId {
+            bot.victim.CurrentLocation = bike.CurrentLocation
+            return true
+        }
+    }
+    return false
 }
 
 func (bot *Bot) handleGridUpdate(grid model.Grid){

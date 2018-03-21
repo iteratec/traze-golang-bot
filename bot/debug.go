@@ -9,7 +9,7 @@ func NewDebug() {
     }
     me := model.Bike{
         PlayerId:        1,
-        CurrentLocation: model.Location{3,1},
+        CurrentLocation: model.Location{3,2},
     }
 
     bot := &Bot{
@@ -19,15 +19,12 @@ func NewDebug() {
         grid: model.Grid{
             Width: 6,
             Height: 6,
-            Bikes: []model.Bike{
-                me,
-                enemy,
-            },
+            Bikes: []model.Bike{me,enemy},
             Tiles: []model.Col{
                 {2,0,0,0,0,0},
                 {2,0,0,0,0,0},
                 {2,0,0,0,0,0},
-                {2,1,1,1,0,0},
+                {2,0,1,1,1,0},
                 {0,0,0,0,0,0},
                 {0,0,0,0,0,0},
             },
