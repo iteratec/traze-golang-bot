@@ -86,7 +86,7 @@ func (bot *Bot) step() {
             bot.hasVictim = false
             bot.wallHug() // alone in component
         } else { // enemy in component
-            if bot.hasVictim && bot.isAlive(bot.victim.PlayerId) && contains(bot.victim, componentEnemies) {
+            if bot.hasVictim && bot.contains(componentEnemies, bot.victim.PlayerId) {
                 logging.Log.Debugf("Attacking victim %v", bot.victim.PlayerId)
                 bot.maxArea()
             } else {
@@ -104,19 +104,10 @@ func (bot *Bot) step() {
     }
 }
 
-func contains(wanted model.Bike, list []model.Bike) bool{
-    for _,bike := range list {
-        if bike.PlayerId == wanted.PlayerId {
-            return true
-        }
-    }
-    return false
-}
-
 // Side effect: updates victims location
-func (bot *Bot) isAlive(playerId int) bool {
-    for _, bike := range bot.grid.Bikes {
-        if bike.PlayerId == playerId {
+func (bot *Bot) contains(list []model.Bike, wantedId int) bool{
+    for _,bike := range list {
+        if bike.PlayerId == wantedId {
             bot.victim.CurrentLocation = bike.CurrentLocation
             return true
         }
