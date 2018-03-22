@@ -86,7 +86,7 @@ func (bot *Bot) step() {
             bot.hasVictim = false
             bot.wallHug() // alone in component
         } else { // enemy in component
-            if bot.hasVictim && bot.isAlive(bot.victim.PlayerId) {
+            if bot.hasVictim && bot.isAlive(bot.victim.PlayerId) && contains(bot.victim, componentEnemies) {
                 logging.Log.Debugf("Attacking victim %v", bot.victim.PlayerId)
                 bot.maxArea()
             } else {
@@ -102,6 +102,15 @@ func (bot *Bot) step() {
             }
         }
     }
+}
+
+func contains(wanted model.Bike, list []model.Bike) bool{
+    for _,bike := range list {
+        if bike.PlayerId == wanted.PlayerId {
+            return true
+        }
+    }
+    return false
 }
 
 func (bot *Bot) isAlive(playerId int) bool {
@@ -196,44 +205,6 @@ func (bot *Bot) enemiesInComponent() []model.Bike {
         }
     }
     return enemies
-}
-
-func (bot *Bot) aloneInComponent() bool {
-
-    // Make copy of grid
-    var cols []model.Col
-    for _, srcCol := range bot.grid.Tiles {
-        col := make([]int, len(srcCol))
-        copy(col, srcCol)
-        cols = append(cols, col)
-    }
-    grid := model.Grid{Height:bot.grid.Height, Width:bot.grid.Width, Tiles: cols}
-
-    gains := []model.Location{bot.pos}
-    for { // rounds; break if no gains anymore
-        lastGains := make([]model.Location, len(gains))
-        copy(lastGains,gains)
-        gains = nil
-        for _, lastGain := range lastGains {
-            for _, gain := range freeNeighbors(lastGain, grid) {
-                for _,bike := range bot.grid.Bikes {
-                    if bike.PlayerId != bot.playerId {
-                        for _, enemyNeighbor := range freeNeighbors(bike.CurrentLocation,bot.grid) {
-                            if enemyNeighbor == gain {
-                                return false
-                            }
-                        }
-                    }
-                }
-                gains = append(gains, gain)
-                grid.Tiles[gain[0]][gain[1]] = bot.playerId
-            }
-        }
-        if len(gains) == 0{
-            break // no gain
-        }
-    }
-    return true
 }
 
 func (bot *Bot) wallHug()  {
