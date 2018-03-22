@@ -113,6 +113,7 @@ func contains(wanted model.Bike, list []model.Bike) bool{
     return false
 }
 
+// Side effect: updates victims location
 func (bot *Bot) isAlive(playerId int) bool {
     for _, bike := range bot.grid.Bikes {
         if bike.PlayerId == playerId {
