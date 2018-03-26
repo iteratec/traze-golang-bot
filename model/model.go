@@ -36,11 +36,6 @@ type SteerCommand struct {
     PlayerToken string `json:"playerToken"`
 }
 
-type CardinalScore struct {
-    Cardinal Cardinal
-    Score    int
-}
-
 type Cardinal uint8
 
 const (
@@ -55,10 +50,4 @@ var CardinalStringMap = map[Cardinal]string {
     E: "E",
     S: "S",
     W: "W",
-}
-var StringCardinalMap = map[string]Cardinal {
-    "N": N,
-    "E": E,
-    "S": S,
-    "W": W,
 }
