@@ -12,7 +12,7 @@ import (
     "math"
 )
 
-const BROKER_GRACE_TIME = 500
+const BROKER_GRACE_TIME = 1
 const NOT_ON_GRID_TRESHOLD = 1
 
 type Bot struct {
@@ -68,7 +68,7 @@ func NewBot() *Bot {
     })
 
     // Request Join. But give mq time to subscribe to player topic
-    time.Sleep(BROKER_GRACE_TIME*time.Millisecond)
+    time.Sleep(BROKER_GRACE_TIME*time.Second)
     joinRequest, _ := json.Marshal(model.JoinMessage{Name:conf.ClientName, MQTTClientName:conf.ClientName})
     mq.Publish("traze/"+conf.GameInstance+"/join", string(joinRequest),false)
     logging.Log.Debug("Joing msg: ", string(joinRequest))
