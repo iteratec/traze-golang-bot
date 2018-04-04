@@ -209,7 +209,7 @@ func (bot *Bot) wallHug()  {
         }
     } else if _, ok := bot.freeNeighborsMap[bot.direction]; ok {
         if isFree(straightLeftLocation(bot.direction,bot.pos),bot.grid) {
-            // keep going straight
+            bot.steer(bot.direction)
         } else {
             bot.maxArea()
         }
