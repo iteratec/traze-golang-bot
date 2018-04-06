@@ -18,3 +18,6 @@
 
 ## Ackknowledgements
 * Pascal van Kooten (https://kootenpv.github.io/2016-09-07-ai-challenge-in-78-lines)
+
+## Contributers
+* Max Berndt (https://github.com/Mexx77)
