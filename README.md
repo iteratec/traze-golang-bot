@@ -1,7 +1,7 @@
 # Traze Golang Bot
 
-* A bot for the MQTT network based traze challanange.
-* See https://github.com/iteratec/traze .
+* A bot for the MQTT network based traze challange.
+* See https://github.com/iteratec/traze 
 * Implements an "area maximizing" bot.
 * Inspired by the idea from Pascal van Kooten (see Acknowledgements).
 
