@@ -8,14 +8,15 @@ import (
 var config *BotConfig
 
 // env var constants
-const mqttBrokerAddress =   "MQTT_BROKER_ADDRESS"
-const clientName =   "CLIENT_NAME"
-const gameInstance = "GAME_INSTANCE"
+const mqttBrokerAddress = "MQTT_BROKER_ADDRESS"
+const nickName          = "NICK_NAME"
+const gameInstance      = "GAME_INSTANCE"
 
 type BotConfig struct {
-    BrokerAddress string
-    ClientName    string
-    GameInstance  string
+    BrokerAddress  string
+    NickName       string
+    MQTTClientName string
+    GameInstance   string
 }
 
 // loads the configuration from environment variables and checks constraints
@@ -24,7 +25,7 @@ func GetConfig() *BotConfig {
 
         config = &BotConfig{
             BrokerAddress: getConfigString(mqttBrokerAddress, "Missing broker address."),
-            ClientName:    getConfigString(clientName, "Missing client name."),
+            NickName:      getConfigString(nickName, "Missing nick name."),
             GameInstance:  getConfigString(gameInstance, "Missing game instance."),
         }
         return config

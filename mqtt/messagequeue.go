@@ -96,25 +96,18 @@ func NewMessageQueue() *MessageQueue {
     conf := config.GetConfig()
     mq := &MessageQueue{}
 
-    // initilize subscribers slice
+    // initialize subscribers slice
     mq.reconnectInterval = _INIT_RECONNECT_INTERVAL
     mq.subscribers = make([]subscriber, 0)
 
     // mqtt options
 	opts := mqtt.NewClientOptions()
     opts.AddBroker(conf.BrokerAddress)
-    opts.SetClientID(conf.ClientName)
+    opts.SetClientID(conf.MQTTClientName)
     opts.SetCleanSession(true)
     opts.SetAutoReconnect(true)
 
-    // set username and password if provided
-    user := conf.ClientName
-    //if conf.Username != "" {
-    //    opts.SetUsername(conf.Username)
-    //    opts.SetPassword(conf.Password)
-    //    user = conf.Username + ":" + conf.Password
-    //}
-    logging.Log.Notice("Connecting to MQTT Broker at " + conf.BrokerAddress + " as " + user)
+    logging.Log.Notice("Connecting to MQTT Broker at " + conf.BrokerAddress + " as " + conf.MQTTClientName)
 
     // register event handlers
     opts.SetConnectionLostHandler(mq.connectionLostHandler)

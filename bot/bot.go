@@ -34,6 +34,7 @@ type Bot struct {
 func NewBot() *Bot {
 
     conf := config.GetConfig()
+    conf.MQTTClientName = mqtt.RandStringBytesMaskImprSrc(20)
     mq := mqtt.NewMessageQueue()
 
     bot := &Bot{mq:mq, ready:false, spawned:false, hasVictim:false}
@@ -49,7 +50,7 @@ func NewBot() *Bot {
     })
 
     // Subscribe to player topic
-    playerTopic := "traze/"+conf.GameInstance+"/player/"+conf.ClientName
+    playerTopic := "traze/"+conf.GameInstance+"/player/"+conf.MQTTClientName
     mq.Subscribe(playerTopic, func(bytes []byte) {
         var playerMsg model.PlayerMessage
         if err := json.Unmarshal(bytes, &playerMsg); err != nil {
@@ -69,7 +70,7 @@ func NewBot() *Bot {
 
     // Request Join. But give mq time to subscribe to player topic
     time.Sleep(BROKER_GRACE_TIME*time.Second)
-    joinRequest, _ := json.Marshal(model.JoinMessage{Name:conf.ClientName, MQTTClientName:conf.ClientName})
+    joinRequest, _ := json.Marshal(model.JoinMessage{Name:conf.NickName, MQTTClientName:conf.MQTTClientName})
     mq.Publish("traze/"+conf.GameInstance+"/join", string(joinRequest),false)
     logging.Log.Debug("Joing msg: ", string(joinRequest))
 
