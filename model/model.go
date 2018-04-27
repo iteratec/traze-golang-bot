@@ -11,6 +11,14 @@ type Bike struct {
     Distance int
 }
 
+type Player struct {
+    Id int `json:"id"`
+    Name string `json:"name"`
+    Color string `json:"color"`
+    Frags int `json:"frags"`
+    Owned int `json:"owned"`
+}
+
 type Grid struct {
     Height int        `json:"height"`
     Width int         `json:"width"`

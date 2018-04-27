@@ -29,6 +29,7 @@ type Bot struct {
     freeNeighborsMap map[model.Cardinal]model.Location
     victim           model.Bike
     hasVictim        bool
+    player           []model.Player
 }
 
 func NewBot() *Bot {
@@ -66,6 +67,17 @@ func NewBot() *Bot {
             bot.ready = true
         }
         mq.Unsubscribe(playerTopic)
+    })
+
+    // Subscribe to players topic
+    playersTopic := "traze/"+conf.GameInstance+"/players"
+    mq.Subscribe(playersTopic, func(bytes []byte) {
+        var player []model.Player
+        if err := json.Unmarshal(bytes, &player); err != nil {
+            logging.Log.Error("Cannot parse players message", string(bytes))
+        } else {
+            bot.player = player
+        }
     })
 
     // Request Join. But give mq time to subscribe to player topic
@@ -180,7 +192,7 @@ func (bot *Bot) enemiesInComponent() []model.Bike {
         for _, lastGain := range lastGains {
             for _, gain := range freeNeighbors(lastGain, grid) {
                 for _,bike := range bot.grid.Bikes {
-                    if bike.PlayerId != bot.playerId {
+                    if bike.PlayerId != bot.playerId && ! bot.hasMyNick(bike.PlayerId) {
                         for _, enemyNeighbor := range freeNeighbors(bike.CurrentLocation,bot.grid) {
                             if enemyNeighbor == gain {
                                 bike.Distance = manhattanDistance(bot.pos, bike.CurrentLocation)
@@ -198,6 +210,16 @@ func (bot *Bot) enemiesInComponent() []model.Bike {
         }
     }
     return enemies
+}
+
+func (bot *Bot) hasMyNick(playId int) bool {
+    conf := config.GetConfig()
+    for _, player := range bot.player {
+        if player.Id == playId && player.Id != bot.playerId && player.Name == conf.NickName {
+            return true
+        }
+    }
+    return false
 }
 
 func (bot *Bot) wallHug()  {
