@@ -201,6 +201,7 @@ func (bot *Bot) enemiesInComponent() []model.Bike {
 }
 
 func (bot *Bot) wallHug()  {
+    logging.Log.Debugf("Pos: %v Dir %v. Feel like wall hugging...", bot.pos, bot.direction)
     rightTurn := turnRight(bot.direction)
     if _, ok := bot.freeNeighborsMap[rightTurn]; ok {
         if isFree(rightLeftLocation(bot.direction,bot.pos),bot.grid) {

@@ -15,7 +15,7 @@ func (bot *Bot) maxArea() {
     nextMove := bot.direction
     for dir, loc := range bot.freeNeighborsMap {
         score := bot.computeScore(loc)
-        logging.Log.Debugf("Move %v to %v has score %v", dir, loc, score)
+        //logging.Log.Debugf("Move %v to %v has score %v", dir, loc, score)
         if score > max {
             max = score
             nextMove = dir
