@@ -11,10 +11,10 @@
 * Falls back to wall hugging when alone in component.
 
 ## Build
-`cd traze-go-bot && go build`
+`docker build -t traze-golang-bot .`
 
-## Usage
-`MQTT_BROKER_ADDRESS="tcp://traze.iteratec.de:1883" GAME_INSTANCE="1" CLIENT_NAME="MyClientName" ./traze-go-bot`
+## Run
+`docker run -e MQTT_BROKER_ADDRESS="tcp://traze.iteratec.de:1883" -e GAME_INSTANCE="1" -e CLIENT_NAME="MyClientName" traze-golang-bot`
 
 ## Ackknowledgements
 * Pascal van Kooten (https://kootenpv.github.io/2016-09-07-ai-challenge-in-78-lines)
