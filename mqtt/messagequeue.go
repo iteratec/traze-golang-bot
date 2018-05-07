@@ -22,25 +22,39 @@ type subscriber struct {
     subscribeCallback func()
 }
 
+type message struct {
+    topic string
+    msg   string
+    retained bool
+}
+
 type MessageQueue struct {
     //
     client mqtt.Client
     //
     subscribers []subscriber
+    //
+    toPublish []message
     // time to wait before reconnect
     reconnectInterval time.Duration
 }
 
 func (mq *MessageQueue) Publish(topic string, msg string, retained bool) {
-    go func() {
-        token := mq.client.Publish(topic, _QOS, retained, msg)
-        token.Wait()
-        if token.Wait() && token.Error() == nil {
-            //logging.Log.Notice("Published message to:", topic)
-        } else {
-            logging.Log.Error("Failed to publish message to: ", topic)
-        }
-    }()
+
+    if mq.client.IsConnected(){
+        go func() {
+            token := mq.client.Publish(topic, _QOS, retained, msg)
+            token.Wait()
+            if token.Wait() && token.Error() == nil {
+                //logging.Log.Notice("Published message to:", topic)
+            } else {
+                logging.Log.Error("Failed to publish message to: ", topic)
+            }
+        }()
+    } else {
+        mq.toPublish = append(mq.toPublish, message{topic: topic, msg:msg, retained:retained})
+    }
+
 }
 
 func (mq *MessageQueue) Subscribe(topic string, handler func([]byte)) {
@@ -85,9 +99,13 @@ func (mq *MessageQueue) connectionLostHandler(c mqtt.Client, e error) {
 func (mq *MessageQueue) onConnectHandler(c mqtt.Client) {
     logging.Log.Notice("Connected to MQTT Broker.")
     mq.reconnectInterval = _INIT_RECONNECT_INTERVAL
-    for i := 0; i < len(mq.subscribers); i++ {
-        mq.subscribers[i].subscribeCallback()
+    for _, sub := range mq.subscribers {
+        sub.subscribeCallback()
     }
+    for _, msg := range mq.toPublish {
+        mq.Publish(msg.topic,msg.msg,msg.retained)
+    }
+    mq.toPublish = nil
 }
 
 // initialize a new message queue
