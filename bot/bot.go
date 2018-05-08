@@ -83,8 +83,9 @@ func NewBot() *Bot {
     // Request Join. But give mq time to subscribe to player topic
     time.Sleep(BROKER_GRACE_TIME*time.Second)
     joinRequest, _ := json.Marshal(model.JoinMessage{Name:conf.NickName, MQTTClientName:conf.MQTTClientName})
+    logging.Log.Debug("Sending join msg to mqtt client: ", string(joinRequest))
     mq.Publish("traze/"+conf.GameInstance+"/join", string(joinRequest),false)
-    logging.Log.Debug("Joing msg: ", string(joinRequest))
+
 
     return bot
 }

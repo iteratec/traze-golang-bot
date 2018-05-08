@@ -46,7 +46,7 @@ func (mq *MessageQueue) Publish(topic string, msg string, retained bool) {
             token := mq.client.Publish(topic, _QOS, retained, msg)
             token.Wait()
             if token.Wait() && token.Error() == nil {
-                //logging.Log.Notice("Published message to:", topic)
+                //logging.Log.Debug("Published message to:", topic)
             } else {
                 logging.Log.Error("Failed to publish message to: ", topic)
             }
@@ -104,6 +104,7 @@ func (mq *MessageQueue) onConnectHandler(c mqtt.Client) {
     }
     for _, msg := range mq.toPublish {
         mq.Publish(msg.topic,msg.msg,msg.retained)
+        logging.Log.Debugf("Published %v to %v", msg.msg, msg.topic)
     }
     mq.toPublish = nil
 }
