@@ -16,7 +16,7 @@ const BROKER_GRACE_TIME = 1
 const NOT_ON_GRID_TRESHOLD = 1
 
 type Bot struct {
-    mq               *mqtt.MessageQueue
+    mqttClient       *mqtt.MQTTClient
     token            string
     playerId         int
     steerTopic       string
@@ -36,12 +36,12 @@ func NewBot() *Bot {
 
     conf := config.GetConfig()
     conf.MQTTClientName = mqtt.RandStringBytesMaskImprSrc(20)
-    mq := mqtt.NewMessageQueue()
+    client := mqtt.NewMQTTClient()
 
-    bot := &Bot{mq:mq, ready:false, spawned:false, hasVictim:false}
+    bot := &Bot{mqttClient: client, ready:false, spawned:false, hasVictim:false}
 
     // Subscribe to grid topic
-    mq.Subscribe("traze/"+conf.GameInstance+"/grid", func(msg []byte) {
+    client.Subscribe("traze/"+conf.GameInstance+"/grid", func(msg []byte) {
         var grid model.Grid
         if err := json.Unmarshal(msg, &grid); err != nil {
             logging.Log.Error("Cannot parse grid message", string(msg))
@@ -52,7 +52,7 @@ func NewBot() *Bot {
 
     // Subscribe to player topic
     playerTopic := "traze/"+conf.GameInstance+"/player/"+conf.MQTTClientName
-    mq.Subscribe(playerTopic, func(bytes []byte) {
+    client.Subscribe(playerTopic, func(bytes []byte) {
         var playerMsg model.PlayerMessage
         if err := json.Unmarshal(bytes, &playerMsg); err != nil {
             logging.Log.Error("Cannot parse player message", string(bytes))
@@ -66,12 +66,12 @@ func NewBot() *Bot {
             bot.spawned = true
             bot.ready = true
         }
-        mq.Unsubscribe(playerTopic)
+        client.Unsubscribe(playerTopic)
     })
 
     // Subscribe to players topic
     playersTopic := "traze/"+conf.GameInstance+"/players"
-    mq.Subscribe(playersTopic, func(bytes []byte) {
+    client.Subscribe(playersTopic, func(bytes []byte) {
         var player []model.Player
         if err := json.Unmarshal(bytes, &player); err != nil {
             logging.Log.Error("Cannot parse players message", string(bytes))
@@ -80,11 +80,11 @@ func NewBot() *Bot {
         }
     })
 
-    // Request Join. But give mq time to subscribe to player topic
+    // Request Join. But give mqttClient time to subscribe to player topic
     time.Sleep(BROKER_GRACE_TIME*time.Second)
     joinRequest, _ := json.Marshal(model.JoinMessage{Name:conf.NickName, MQTTClientName:conf.MQTTClientName})
     logging.Log.Debug("Sending join msg to mqtt client: ", string(joinRequest))
-    mq.Publish("traze/"+conf.GameInstance+"/join", string(joinRequest),false)
+    client.Publish("traze/"+conf.GameInstance+"/join", string(joinRequest),false)
 
 
     return bot
@@ -246,6 +246,6 @@ func (bot *Bot) wallHug()  {
 func (bot *Bot) steer(dir model.Cardinal) {
     steerCmd, _ := json.Marshal(model.SteerCommand{Course: model.CardinalStringMap[dir], PlayerToken: bot.token})
     //logging.Log.Debug("Going to steer: ", string(steerCmd))
-    bot.mq.Publish(bot.steerTopic,string(steerCmd),false)
+    bot.mqttClient.Publish(bot.steerTopic,string(steerCmd),false)
     bot.direction = dir
 }
