@@ -101,7 +101,7 @@ func (bot *Bot) step() {
             bot.wallHug() // alone in component
         } else { // enemy in component
             if bot.hasVictim && bot.contains(componentEnemies, bot.victim.PlayerId) {
-                logging.Log.Debugf("Attacking victim %v", bot.victim.PlayerId)
+                logging.Log.Infof("Attacking victim %v", bot.victim.PlayerId)
                 bot.maxArea()
             } else {
                 minDist := math.MaxInt32
@@ -110,7 +110,7 @@ func (bot *Bot) step() {
                         bot.victim = bike
                     }
                 }
-                logging.Log.Debugf("Attacking closest enemy. Dist %v Pos %v Id %v", bot.victim.Distance, bot.victim.CurrentLocation, bot.victim.PlayerId)
+                logging.Log.Infof("Attacking closest enemy. Dist %v Pos %v Id %v", bot.victim.Distance, bot.victim.CurrentLocation, bot.victim.PlayerId)
                 bot.hasVictim = true
                 bot.maxArea()
             }
@@ -224,7 +224,7 @@ func (bot *Bot) hasMyNick(playId int) bool {
 }
 
 func (bot *Bot) wallHug()  {
-    logging.Log.Debugf("Pos: %v Dir %v. Feel like wall hugging...", bot.pos, bot.direction)
+    //logging.Log.Debugf("Pos: %v Dir %v. Feel like wall hugging...", bot.pos, bot.direction)
     rightTurn := turnRight(bot.direction)
     if _, ok := bot.freeNeighborsMap[rightTurn]; ok {
         if isFree(rightLeftLocation(bot.direction,bot.pos),bot.grid) {

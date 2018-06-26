@@ -22,7 +22,7 @@ func (bot *Bot) maxArea() {
         }
     }
 
-    logging.Log.Debugf("Pos: %v Dir: %v Possible moves: %v Going %v (%v)", bot.pos, bot.direction, bot.freeNeighborsMap, nextMove, max)
+    logging.Log.Infof("Pos: %v Dir: %v Possible moves: %v Going %v (%v)", bot.pos, bot.direction, bot.freeNeighborsMap, nextMove, max)
     //logging.Log.Debug(bot.grid.Tiles)
     bot.steer(nextMove)
 }
@@ -30,7 +30,7 @@ func (bot *Bot) maxArea() {
 func (bot *Bot) computeScore(loc model.Location) int {
 
     if bot.isDanger(loc, bot.grid) {
-        logging.Log.Debug("Danger: ", loc)
+        logging.Log.Info("Danger: ", loc)
         return DANGER_SCORE
     }
 
