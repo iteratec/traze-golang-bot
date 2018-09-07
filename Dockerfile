@@ -11,7 +11,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o $APP/main $APP/ma
 
 # ------------------- Cut Here ------------------ #
 
-FROM scratch
+FROM alpine
 
 COPY --from=builder /go/traze-golang-bot/main /
-ENTRYPOINT ["/main"]
+ENTRYPOINT ["/bin/sh"]
+CMD ["-c", "while true; do /main; done"]
