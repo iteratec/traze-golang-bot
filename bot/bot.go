@@ -107,6 +107,7 @@ func (bot *Bot) step() {
                 minDist := math.MaxInt32
                 for  _, bike :=  range componentEnemies {
                     if bike.Distance < minDist {
+                        minDist = bike.Distance
                         bot.victim = bike
                     }
                 }
@@ -132,15 +133,6 @@ func (bot *Bot) contains(list []model.Bike, wantedId int) bool{
 func (bot *Bot) handleGridUpdate(grid model.Grid){
 
     bot.grid = grid
-
-    // Fixing Server bugs
-    //bot.grid.Tiles = bot.grid.Tiles[:bot.grid.Width]
-    //for i, tile := range bot.grid.Tiles {
-    //    bot.grid.Tiles[i] = tile[:bot.grid.Height]
-    //}
-    //for _, bike := range grid.Bikes {
-    //    bot.grid.Tiles[bike.CurrentLocation[0]][bike.CurrentLocation[1]] = bike.PlayerId
-    //}
 
     if bot.ready {
         if bot.spawned {
